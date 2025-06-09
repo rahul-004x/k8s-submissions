@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+
+kind: Deployment
+
+metadata:
+  name: logger-app
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: loggenerator
+  template:
+    metadata:
+      labels:
+        app: loggenerator
+    spec:
+      containers:
+        - name: loggenerator
+          image: rahul004x/log-output
