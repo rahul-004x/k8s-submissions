@@ -1,0 +1,17 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: the-project
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: the-project
+  template:
+    metadata:
+      labels:
+        app: the-project
+    spec:
+      containers:
+        - name: the-project
+          image: rahul004x/the-project
