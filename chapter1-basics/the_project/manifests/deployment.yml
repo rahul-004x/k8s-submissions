@@ -14,4 +14,7 @@ spec:
     spec:
       containers:
         - name: the-project
-          image: rahul004x/the-project
+          image: rahul004x/the-project:v1.1
+          env:
+            - name: PORT
+              value: "3000"
