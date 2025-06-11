@@ -17,9 +17,25 @@ app.get('/', (req, res) => {
         // Read the log file content
         const logContent = fs.readFileSync(logFilePath, 'utf8')
         
+        // Read the ping-pong counter
+        const counterFilePath = path.join(sharedPath, 'counter.txt')
+        let pingPongCounter = 'N/A'
+        
+        try {
+            if (fs.existsSync(counterFilePath)) {
+                const counterContent = fs.readFileSync(counterFilePath, 'utf8')
+                pingPongCounter = counterContent.trim()
+            }
+        } catch (error) {
+            console.error('Error reading ping-pong counter:', error)
+        }
+        
+        // Combine log content with ping-pong counter
+        const output = `Ping / Pongs: ${pingPongCounter}\n\n${logContent}`
+        
         // Send the content as plain text
         res.set('Content-Type', 'text/plain')
-        res.send(logContent)
+        res.send(output)
     } catch (error) {
         console.error('Error reading log file:', error)
         res.status(500).send('Error reading log file')

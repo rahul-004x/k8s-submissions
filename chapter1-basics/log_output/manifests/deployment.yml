@@ -13,21 +13,22 @@ spec:
         app: loggenerator
     spec:
       volumes:
-        - name: shared-logs
-          emptyDir: {}
+        - name: shared-data
+          persistentVolumeClaim:
+            claimName: shared-data-pvc
       containers:
         - name: log-generator
-          image: rahul004x/log-generator:v1
+          image: rahul004x/log-generator:v2
           volumeMounts:
-            - name: shared-logs
+            - name: shared-data
               mountPath: /shared
         - name: log-reader
-          image: rahul004x/log-reader:v1
+          image: rahul004x/log-reader:v2
           ports:
             - containerPort: 3003
           env:
             - name: PORT
               value: "3003"
           volumeMounts:
-            - name: shared-logs
+            - name: shared-data
               mountPath: /shared
