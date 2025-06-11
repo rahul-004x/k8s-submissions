@@ -1,0 +1,14 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm install
+
+COPY log-generator.js ./
+
+# Create shared directory
+RUN mkdir -p /shared
+
+ENTRYPOINT [ "node", "log-generator.js" ]

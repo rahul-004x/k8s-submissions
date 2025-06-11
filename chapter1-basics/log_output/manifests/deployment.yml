@@ -12,9 +12,22 @@ spec:
       labels:
         app: loggenerator
     spec:
+      volumes:
+        - name: shared-logs
+          emptyDir: {}
       containers:
-        - name: loggenerator
-          image: rahul004x/log-output:v1.1
+        - name: log-generator
+          image: rahul004x/log-generator:v1
+          volumeMounts:
+            - name: shared-logs
+              mountPath: /shared
+        - name: log-reader
+          image: rahul004x/log-reader:v1
+          ports:
+            - containerPort: 3003
           env:
             - name: PORT
               value: "3003"
+          volumeMounts:
+            - name: shared-logs
+              mountPath: /shared
