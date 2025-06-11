@@ -1,0 +1,1 @@
+Deploy the application: kubectl apply -f manifests/

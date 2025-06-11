@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: shared-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /pingpong
+        pathType: Prefix
+        backend:
+          service:
+            name: pingpong-service
+            port:
+              number: 80
+      # Add additional paths here for other applications
+      # - path: /logs
+      #   pathType: Prefix
+      #   backend:
+      #     service:
+      #       name: log-output-service
+      #       port:
+      #         number: 80
