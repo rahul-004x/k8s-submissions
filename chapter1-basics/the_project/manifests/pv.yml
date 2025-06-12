@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: image-cache-pv
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+
+  storageClassName: image-cache-pv
+  hostPath:
+    path: /tmp/image-cache
+    type: DirectoryOrCreate
+  nodeAffinity: ## This is only required for local, it defines which nodes can access it
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - k3d-k3s-default-agent-0

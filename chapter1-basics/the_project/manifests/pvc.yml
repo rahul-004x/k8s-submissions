@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: image-cache-pvc
+spec:
+  storageClassName: image-cache-pv # this is the name of the persistent volume we are claiming
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi

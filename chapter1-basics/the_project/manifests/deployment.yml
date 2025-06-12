@@ -14,7 +14,16 @@ spec:
     spec:
       containers:
         - name: the-project
-          image: rahul004x/the-project:v1.1
+          image: rahul004x/the-project:v2
           env:
             - name: PORT
               value: "3000"
+          volumeMounts:
+            - name: image-cache-volume
+              mountPath: /app/cache
+          ports:
+            - containerPort: 3000
+      volumes:
+        - name: image-cache-volume
+          persistentVolumeClaim:
+            claimName: image-cache-pvc

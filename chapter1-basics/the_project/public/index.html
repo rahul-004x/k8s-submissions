@@ -1,118 +1,104 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>K8s Project - Chapter 1</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-        }
-        
-        .container {
-            text-align: center;
-            padding: 2rem;
-            backdrop-filter: blur(10px);
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
-        }
-        
-        h1 {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-        }
-        
-        .subtitle {
-            font-size: 1.2rem;
-            margin-bottom: 2rem;
-            opacity: 0.9;
-        }
-        
-        .info-card {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 1.5rem;
-            margin: 1rem 0;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .status {
-            color: #4ade80;
-            font-weight: bold;
-            font-size: 1.1rem;
-        }
-        
-        .timestamp {
-            font-size: 0.9rem;
-            opacity: 0.8;
-            margin-top: 1rem;
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-            100% { transform: scale(1); }
-        }
-        
-        .container:hover {
-            animation: pulse 2s infinite;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The project App</title>
+  <style>
+    body {
+      font-family: Georgia, 'Times New Roman', Times, serif;
+      margin: 0;
+      padding: 40px;
+      background-color: white;
+      color: black;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: bold;
+      margin-bottom: 30px;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 0;
+      text-align: left;
+    }
+
+    img {
+      max-width: 50%;
+      border-radius: 4px;
+      height: auto;
+      display: block;
+      margin-bottom: 20px;
+    }
+
+    .footer {
+      font-size: 1.2rem;
+      margin-top: 20px;
+    }
+
+    .loading {
+      text-align: center;
+      color: #666;
+      font-style: italic;
+    }
+
+    .image-info {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 20px;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🚀 K8s Project</h1>
-        <p class="subtitle">Chapter 1 - The Basics</p>
-        
-        <div class="info-card">
-            <p class="status">✅ Server is running successfully!</p>
-            <p>Express.js application deployed and ready</p>
-        </div>
-        
-        <div class="info-card">
-            <p><strong>Port:</strong> <span id="port">Loading...</span></p>
-            <p><strong>Environment:</strong> <span id="environment">Loading...</span></p>
-            <p><strong>Node.js:</strong> <span id="nodeVersion">Loading...</span></p>
-        </div>
-        
-        <p class="timestamp" id="timestamp">
-            Server started at: <span id="startTime">Loading...</span>
-        </p>
-    </div>
+  <div class="container">
+    <h1>The project App</h1>
+    <div id="loading" class="loading">Loading image...</div>
+    <img id="dynamicImage" src="" alt="Random Image from Lorem Picsum" style="display: none;">
+    <div id="imageInfo" class="image-info" style="display: none;"></div>
+    <p class="footer">DevOps with Kubernetes 2025</p>
+  </div>
 
-    <script>
-        // Fetch server info from API endpoint
-        fetch('/api/info')
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('port').textContent = data.port;
-                document.getElementById('environment').textContent = data.environment;
-                document.getElementById('nodeVersion').textContent = data.nodeVersion;
-                document.getElementById('startTime').textContent = data.startTime;
-            })
-            .catch(error => {
-                console.error('Error fetching server info:', error);
-                document.getElementById('port').textContent = 'Unknown';
-                document.getElementById('environment').textContent = 'Unknown';
-                document.getElementById('nodeVersion').textContent = 'Unknown';
-                document.getElementById('startTime').textContent = 'Unknown';
-            });
-    </script>
+  <script>
+    async function loadImage() {
+      try {
+        const response = await fetch('/api/image');
+        const data = await response.json();
+        
+        const img = document.getElementById('dynamicImage');
+        const loading = document.getElementById('loading');
+        const imageInfo = document.getElementById('imageInfo');
+        
+        img.src = data.imageUrl;
+        img.onload = function() {
+          loading.style.display = 'none';
+          img.style.display = 'block';
+          imageInfo.style.display = 'block';
+          
+          const cacheAgeMinutes = Math.floor(data.cacheAge / (1000 * 60));
+          const nextRefreshMinutes = Math.floor(data.nextRefresh / (1000 * 60));
+          
+          imageInfo.innerHTML = `
+            Image cached ${cacheAgeMinutes} minutes ago. 
+            Next refresh in ${`${nextRefreshMinutes + 1}`} minutes.
+          `;
+        };
+        
+        img.onerror = function() {
+          loading.innerHTML = 'Failed to load image';
+        };
+        
+      } catch (error) {
+        document.getElementById('loading').innerHTML = 'Error loading image: ' + error.message;
+      }
+    }
+
+    // Load image when page loads
+    loadImage();
+
+    // Refresh image every 30 seconds to check for updates
+    setInterval(loadImage, 30000);
+  </script>
 </body>
 </html>
