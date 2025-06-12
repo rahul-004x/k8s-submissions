@@ -14,4 +14,5 @@
 - [1.8](https://github.com/rahul-004x/k8s-submissions/tree/main/chapter1-basics/the_project)
 - [1.9](https://github.com/rahul-004x/k8s-submissions/tree/main/chapter1-basics/ping-pong)
 - [1.10](https://github.com/rahul-004x/k8s-submissions/tree/main/chapter1-basics/log_output)
-- [1.11](https://github.com/rahul-004x/k8s-submissions/tree/1.10/chapter1-basics)
+- [1.11](https://github.com/rahul-004x/k8s-submissions/tree/1.11/chapter1-basics)
+- [1.12](https://github.com/rahul-004x/k8s-submissions/tree/main/chapter1-basics/the_project)
