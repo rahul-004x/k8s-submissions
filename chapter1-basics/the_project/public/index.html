@@ -49,6 +49,95 @@
       color: #666;
       margin-bottom: 20px;
     }
+
+    .todo-section {
+      margin-top: 40px;
+      border-top: 1px solid #ddd;
+      padding-top: 30px;
+    }
+
+    .todo-input-container {
+      margin-bottom: 20px;
+    }
+
+    .todo-input {
+      width: 100%;
+      max-width: 500px;
+      padding: 12px;
+      font-size: 1rem;
+      border: 2px solid #ddd;
+      border-radius: 4px;
+      font-family: Georgia, 'Times New Roman', Times, serif;
+      margin-bottom: 10px;
+      box-sizing: border-box;
+    }
+
+    .todo-input:focus {
+      outline: none;
+      border-color: #007acc;
+    }
+
+    .todo-input.invalid {
+      border-color: #d32f2f;
+    }
+
+    .char-counter {
+      font-size: 0.8rem;
+      color: #666;
+      margin-bottom: 10px;
+    }
+
+    .char-counter.warning {
+      color: #ff9800;
+    }
+
+    .char-counter.error {
+      color: #d32f2f;
+    }
+
+    .send-button {
+      background-color: #007acc;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: Georgia, 'Times New Roman', Times, serif;
+    }
+
+    .send-button:hover {
+      background-color: #005a9e;
+    }
+
+    .send-button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    .todo-list {
+      margin-top: 30px;
+    }
+
+    .todo-list h3 {
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    .todo-item {
+      background-color: #f9f9f9;
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
+      padding: 15px;
+      margin-bottom: 10px;
+    }
+
+    .todo-text {
+      font-size: 1rem;
+      line-height: 1.4;
+      color: #333;
+    }
   </style>
 </head>
 <body>
@@ -57,10 +146,110 @@
     <div id="loading" class="loading">Loading image...</div>
     <img id="dynamicImage" src="" alt="Random Image from Lorem Picsum" style="display: none;">
     <div id="imageInfo" class="image-info" style="display: none;"></div>
+    
+    <!-- Todo Section -->
+    <div class="todo-section">
+      <h2>Todo List</h2>
+      
+      <div class="todo-input-container">
+        <input 
+          type="text" 
+          id="todoInput" 
+          class="todo-input" 
+          placeholder="Enter a new todo (max 140 characters)..."
+          maxlength="140"
+        >
+        <div id="charCounter" class="char-counter">0/140 characters</div>
+        <button id="sendButton" class="send-button">Send</button>
+      </div>
+      
+      <div class="todo-list">
+        <h3>Current Todos</h3>
+        <div id="todoList">
+          <!-- Hardcoded todos will be inserted here -->
+        </div>
+      </div>
+    </div>
+    
     <p class="footer">DevOps with Kubernetes 2025</p>
   </div>
 
   <script>
+    // Hardcoded todos
+    const hardcodedTodos = [
+      "Learn Kubernetes basics",
+      "Set up Docker development environment",
+      "Create a simple web application",
+      "Deploy app to Kubernetes cluster",
+      "Configure persistent storage",
+      "Implement CI/CD pipeline"
+    ];
+
+    // Initialize todo functionality
+    function initializeTodos() {
+      const todoList = document.getElementById('todoList');
+      const todoInput = document.getElementById('todoInput');
+      const sendButton = document.getElementById('sendButton');
+      const charCounter = document.getElementById('charCounter');
+
+      // Display hardcoded todos
+      function displayTodos() {
+        todoList.innerHTML = '';
+        hardcodedTodos.forEach(todo => {
+          const todoItem = document.createElement('div');
+          todoItem.className = 'todo-item';
+          todoItem.innerHTML = `<div class="todo-text">${todo}</div>`;
+          todoList.appendChild(todoItem);
+        });
+      }
+
+      // Update character counter
+      function updateCharCounter() {
+        const length = todoInput.value.length;
+        const remaining = 140 - length;
+        charCounter.textContent = `${length}/140 characters`;
+        
+        // Update styling based on character count
+        charCounter.className = 'char-counter';
+        todoInput.className = 'todo-input';
+        
+        if (length > 120) {
+          charCounter.classList.add('warning');
+        }
+        if (length === 140) {
+          charCounter.classList.add('error');
+          todoInput.classList.add('invalid');
+        }
+        
+        // Disable send button if input is empty or too long
+        sendButton.disabled = length === 0 || length > 140;
+      }
+
+      // Handle send button click
+      function handleSend() {
+        const todoText = todoInput.value.trim();
+        if (todoText && todoText.length <= 140) {
+          // For now, just show an alert since we're not implementing actual sending yet
+          alert(`Todo would be sent: "${todoText}"`);
+          todoInput.value = '';
+          updateCharCounter();
+        }
+      }
+
+      // Event listeners
+      todoInput.addEventListener('input', updateCharCounter);
+      todoInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && !sendButton.disabled) {
+          handleSend();
+        }
+      });
+      sendButton.addEventListener('click', handleSend);
+
+      // Initialize
+      displayTodos();
+      updateCharCounter();
+    }
+
     async function loadImage() {
       try {
         const response = await fetch('/api/image');
@@ -96,6 +285,9 @@
 
     // Load image when page loads
     loadImage();
+    
+    // Initialize todo functionality when page loads
+    initializeTodos();
 
     // Refresh image every 30 seconds to check for updates
     setInterval(loadImage, 30000);
