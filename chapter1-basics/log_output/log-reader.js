@@ -1,13 +1,17 @@
 const express = require('express')
 const fs = require('fs')
 const path = require('path')
+const axios = require('axios')
 
 const app = express()
 // Use /shared in container, ./shared locally
 const sharedPath = fs.existsSync('/shared') ? '/shared' : path.join(__dirname, 'shared')
 const logFilePath = path.join(sharedPath, 'app.log')
 
-app.get('/', (req, res) => {
+// Ping-pong service URL (will be available as a Kubernetes service)
+const PINGPONG_SERVICE_URL = process.env.PINGPONG_SERVICE_URL || 'http://pingpong-service:80/counter'
+
+app.get('/', async (req, res) => {
     try {
         // Check if the log file exists
         if (!fs.existsSync(logFilePath)) {
@@ -17,17 +21,18 @@ app.get('/', (req, res) => {
         // Read the log file content
         const logContent = fs.readFileSync(logFilePath, 'utf8')
         
-        // Read the ping-pong counter
-        const counterFilePath = path.join(sharedPath, 'counter.txt')
+        // Get the ping-pong counter via HTTP request
         let pingPongCounter = 'N/A'
         
         try {
-            if (fs.existsSync(counterFilePath)) {
-                const counterContent = fs.readFileSync(counterFilePath, 'utf8')
-                pingPongCounter = counterContent.trim()
-            }
+            console.log(`Making request to: ${PINGPONG_SERVICE_URL}`)
+            const response = await axios.get(PINGPONG_SERVICE_URL, { timeout: 5000 })
+            pingPongCounter = response.data.count
+            console.log(`Received ping-pong counter: ${pingPongCounter}`)
         } catch (error) {
-            console.error('Error reading ping-pong counter:', error)
+            console.error('Error fetching ping-pong counter via HTTP:', error.message)
+            // Fallback to N/A if the service is not available
+            pingPongCounter = 'N/A'
         }
         
         // Combine log content with ping-pong counter

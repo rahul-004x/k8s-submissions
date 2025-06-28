@@ -1,52 +1,42 @@
 const express = require('express')
-const fs = require('fs')
-const path = require('path')
 const app = express()
 require('dotenv').config()
 
-// Use /shared in container, ./shared locally
-const sharedPath = fs.existsSync('/shared') ? '/shared' : path.join(__dirname, 'shared')
-const counterFilePath = path.join(sharedPath, 'counter.txt')
+// In-memory counter since we're no longer using shared volumes
+let counter = 0
 
-// Ensure the shared directory exists
-const sharedDir = path.dirname(counterFilePath)
-if (!fs.existsSync(sharedDir)) {
-    fs.mkdirSync(sharedDir, { recursive: true })
-}
-
-// Initialize counter file if it doesn't exist
-if (!fs.existsSync(counterFilePath)) {
-    fs.writeFileSync(counterFilePath, '0')
-}
-
-// Function to read counter from file
+// Function to get counter
 function getCounter() {
-    try {
-        const content = fs.readFileSync(counterFilePath, 'utf8')
-        return parseInt(content.trim()) || 0
-    } catch (error) {
-        console.error('Error reading counter:', error)
-        return 0
-    }
+    return counter
 }
 
-// Function to write counter to file
-function setCounter(count) {
-    try {
-        fs.writeFileSync(counterFilePath, count.toString())
-    } catch (error) {
-        console.error('Error writing counter:', error)
-    }
+// Function to increment counter
+function incrementCounter() {
+    counter++
+    return counter
 }
 
 app.get('/pingpong', (req,res) => {
     const currentCounter = getCounter()
     res.json(`pong ${currentCounter}`)
-    setCounter(currentCounter + 1)
-    console.log(`Request ${currentCounter} processed, counter incremented`)
+    incrementCounter()
+    console.log(`Request ${currentCounter} processed, counter incremented to ${getCounter()}`)
+})
+
+// New endpoint to get just the counter value for other services
+app.get('/counter', (req, res) => {
+    const currentCounter = getCounter()
+    res.json({ count: currentCounter })
+    console.log(`Counter value ${currentCounter} requested`)
 })
 
 const PORT = process.env.PORT || 3000
 app.listen(PORT, () => {
     console.log(`server is running on port ${PORT}`)
 })
+
+// Simulate periodic ping-pong activity every 10 seconds
+setInterval(() => {
+    incrementCounter()
+    console.log(`Simulated ping-pong activity, counter now: ${getCounter()}`)
+}, 10000)

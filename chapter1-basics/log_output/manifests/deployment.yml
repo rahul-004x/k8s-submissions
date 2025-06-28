@@ -18,17 +18,19 @@ spec:
             claimName: shared-data-pvc
       containers:
         - name: log-generator
-          image: rahul004x/log-generator:v2
+          image: rahul004x/log-generator:v3
           volumeMounts:
             - name: shared-data
               mountPath: /shared
         - name: log-reader
-          image: rahul004x/log-reader:v2
+          image: rahul004x/log-reader:v4
           ports:
             - containerPort: 3003
           env:
             - name: PORT
               value: "3003"
+            - name: PINGPONG_SERVICE_URL
+              value: "http://pingpong-service/counter"
           volumeMounts:
             - name: shared-data
               mountPath: /shared

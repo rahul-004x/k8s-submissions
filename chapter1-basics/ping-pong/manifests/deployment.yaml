@@ -14,18 +14,11 @@ spec:
       labels:
         app: pingpong
     spec:
-      volumes:
-        - name: shared-data
-          persistentVolumeClaim:
-            claimName: shared-data-pvc
       containers:
       - name: pingpong
-        image: rahul004x/pingpong:v1
+        image: rahul004x/pingpong:v3
         ports:
         - containerPort: 3000
         env:
         - name: PORT
           value: "3000"
-        volumeMounts:
-        - name: shared-data
-          mountPath: /shared
