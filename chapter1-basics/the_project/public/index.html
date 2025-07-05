@@ -1,12 +1,13 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>The project App</title>
   <style>
     body {
-      font-family: Georgia, 'Times New Roman', Times, serif;
+      font-family: Georgia, "Times New Roman", Times, serif;
       margin: 0;
       padding: 40px;
       background-color: white;
@@ -67,7 +68,7 @@
       font-size: 1rem;
       border: 2px solid #ddd;
       border-radius: 4px;
-      font-family: Georgia, 'Times New Roman', Times, serif;
+      font-family: Georgia, "Times New Roman", Times, serif;
       margin-bottom: 10px;
       box-sizing: border-box;
     }
@@ -103,7 +104,7 @@
       font-size: 1rem;
       border-radius: 4px;
       cursor: pointer;
-      font-family: Georgia, 'Times New Roman', Times, serif;
+      font-family: Georgia, "Times New Roman", Times, serif;
     }
 
     .send-button:hover {
@@ -140,29 +141,25 @@
     }
   </style>
 </head>
+
 <body>
   <div class="container">
     <h1>The project App</h1>
     <div id="loading" class="loading">Loading image...</div>
-    <img id="dynamicImage" src="" alt="Random Image from Lorem Picsum" style="display: none;">
-    <div id="imageInfo" class="image-info" style="display: none;"></div>
-    
+    <img id="dynamicImage" src="" alt="Random Image from Lorem Picsum" style="display: none" />
+    <div id="imageInfo" class="image-info" style="display: none"></div>
+
     <!-- Todo Section -->
     <div class="todo-section">
       <h2>Todo List</h2>
-      
+
       <div class="todo-input-container">
-        <input 
-          type="text" 
-          id="todoInput" 
-          class="todo-input" 
-          placeholder="Enter a new todo (max 140 characters)..."
-          maxlength="140"
-        >
+        <input type="text" id="todoInput" class="todo-input" placeholder="Enter a new todo (max 140 characters)..."
+          maxlength="140" />
         <div id="charCounter" class="char-counter">0/140 characters</div>
         <button id="sendButton" class="send-button">Send</button>
       </div>
-      
+
       <div class="todo-list">
         <h3>Current Todos</h3>
         <div id="todoList">
@@ -170,35 +167,44 @@
         </div>
       </div>
     </div>
-    
+
     <p class="footer">DevOps with Kubernetes 2025</p>
   </div>
 
   <script>
-    // Hardcoded todos
-    const hardcodedTodos = [
-      "Learn Kubernetes basics",
-      "Set up Docker development environment",
-      "Create a simple web application",
-      "Deploy app to Kubernetes cluster",
-      "Configure persistent storage",
-      "Implement CI/CD pipeline"
-    ];
+    // Global todos array
+    let todos = [];
 
     // Initialize todo functionality
     function initializeTodos() {
-      const todoList = document.getElementById('todoList');
-      const todoInput = document.getElementById('todoInput');
-      const sendButton = document.getElementById('sendButton');
-      const charCounter = document.getElementById('charCounter');
+      const todoList = document.getElementById("todoList");
+      const todoInput = document.getElementById("todoInput");
+      const sendButton = document.getElementById("sendButton");
+      const charCounter = document.getElementById("charCounter");
 
-      // Display hardcoded todos
+      // Load todos from backend
+      async function loadTodos() {
+        try {
+          const response = await fetch("/todos");
+          todos = await response.json();
+          displayTodos();
+        } catch (error) {
+          console.error("Error loading todos:", error);
+        }
+      }
+
+      // Display todos
       function displayTodos() {
-        todoList.innerHTML = '';
-        hardcodedTodos.forEach(todo => {
-          const todoItem = document.createElement('div');
-          todoItem.className = 'todo-item';
-          todoItem.innerHTML = `<div class="todo-text">${todo}</div>`;
+        todoList.innerHTML = "";
+        if (todos.length === 0) {
+          todoList.innerHTML = '<div class="todo-item"><div class="todo-text">No todos yet. Add your first todo above!</div></div>';
+          return;
+        }
+
+        todos.forEach((todo) => {
+          const todoItem = document.createElement("div");
+          todoItem.className = "todo-item";
+          todoItem.innerHTML = `<div class="todo-text">${todo.text}</div>`;
           todoList.appendChild(todoItem);
         });
       }
@@ -206,86 +212,113 @@
       // Update character counter
       function updateCharCounter() {
         const length = todoInput.value.length;
-        const remaining = 140 - length;
         charCounter.textContent = `${length}/140 characters`;
-        
+
         // Update styling based on character count
-        charCounter.className = 'char-counter';
-        todoInput.className = 'todo-input';
-        
+        charCounter.className = "char-counter";
+        todoInput.className = "todo-input";
+
         if (length > 120) {
-          charCounter.classList.add('warning');
+          charCounter.classList.add("warning");
         }
         if (length === 140) {
-          charCounter.classList.add('error');
-          todoInput.classList.add('invalid');
+          charCounter.classList.add("error");
+          todoInput.classList.add("invalid");
         }
-        
+
         // Disable send button if input is empty or too long
         sendButton.disabled = length === 0 || length > 140;
       }
 
       // Handle send button click
-      function handleSend() {
+      async function handleSend() {
         const todoText = todoInput.value.trim();
         if (todoText && todoText.length <= 140) {
-          // For now, just show an alert since we're not implementing actual sending yet
-          alert(`Todo would be sent: "${todoText}"`);
-          todoInput.value = '';
-          updateCharCounter();
+          try {
+            sendButton.disabled = true;
+            sendButton.textContent = "Sending...";
+
+            const response = await fetch("/todos", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ text: todoText }),
+            });
+
+            if (response.ok) {
+              const newTodo = await response.json();
+              todos.push(newTodo);
+              todoInput.value = "";
+              displayTodos();
+              updateCharCounter();
+            } else {
+              const error = await response.json();
+              alert("Error creating todo: " + error.error);
+            }
+          } catch (error) {
+            console.error("Error creating todo:", error);
+            alert("Error creating todo. Please try again.");
+          } finally {
+            sendButton.disabled = false;
+            sendButton.textContent = "Send";
+            updateCharCounter();
+          }
         }
       }
 
       // Event listeners
-      todoInput.addEventListener('input', updateCharCounter);
-      todoInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter' && !sendButton.disabled) {
+      todoInput.addEventListener("input", updateCharCounter);
+      todoInput.addEventListener("keypress", function (e) {
+        if (e.key === "Enter" && !sendButton.disabled) {
           handleSend();
         }
       });
-      sendButton.addEventListener('click', handleSend);
+      sendButton.addEventListener("click", handleSend);
 
       // Initialize
-      displayTodos();
+      loadTodos();
       updateCharCounter();
     }
 
     async function loadImage() {
       try {
-        const response = await fetch('/api/image');
+        const response = await fetch("/api/image");
         const data = await response.json();
-        
-        const img = document.getElementById('dynamicImage');
-        const loading = document.getElementById('loading');
-        const imageInfo = document.getElementById('imageInfo');
-        
+
+        const img = document.getElementById("dynamicImage");
+        const loading = document.getElementById("loading");
+        const imageInfo = document.getElementById("imageInfo");
+
         img.src = data.imageUrl;
-        img.onload = function() {
-          loading.style.display = 'none';
-          img.style.display = 'block';
-          imageInfo.style.display = 'block';
-          
+        img.onload = function () {
+          loading.style.display = "none";
+          img.style.display = "block";
+          imageInfo.style.display = "block";
+
           const cacheAgeMinutes = Math.floor(data.cacheAge / (1000 * 60));
-          const nextRefreshMinutes = Math.floor(data.nextRefresh / (1000 * 60));
-          
+          const nextRefreshMinutes = Math.floor(
+            data.nextRefresh / (1000 * 60),
+          );
+
           imageInfo.innerHTML = `
-            Image cached ${cacheAgeMinutes} minutes ago. 
-            Next refresh in ${`${nextRefreshMinutes + 1}`} minutes.
-          `;
+              Image cached ${cacheAgeMinutes} minutes ago.
+              Next refresh in ${`${nextRefreshMinutes + 1}`} minutes.
+            `;
         };
-        
-        img.onerror = function() {
-          loading.innerHTML = 'Failed to load image';
+
+        img.onerror = function () {
+          loading.innerHTML = "Failed to load image";
         };
-        
       } catch (error) {
-        document.getElementById('loading').innerHTML = 'Error loading image: ' + error.message;
+        document.getElementById("loading").innerHTML =
+          "Error loading image: " + error.message;
       }
     }
 
     // Load image when page loads
     loadImage();
-    
+
     // Initialize todo functionality when page loads
     initializeTodos();
 
@@ -293,4 +326,5 @@
     setInterval(loadImage, 30000);
   </script>
 </body>
+
 </html>
