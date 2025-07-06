@@ -1,6 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
+  namespace: exercises
   name: shared-data-pvc
 spec:
   storageClassName: manual
