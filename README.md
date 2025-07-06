@@ -19,3 +19,4 @@
 - [1.13](https://github.com/rahul-004x/k8s-submissions/tree/main/chapter1-basics/the_project)
 - [2.1](https://github.com/rahul-004x/k8s-submissions/tree/2.1)
 - [2.2](https://github.com/rahul-004x/k8s-submissions/tree/2.2)
+- [2.3](https://github.com/rahul-004x/k8s-submissions/tree/2.3)
